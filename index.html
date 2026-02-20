@@ -270,6 +270,80 @@ main { padding: 76px 20px 48px; max-width: 1160px; margin: 0 auto; }
 }
 .comment-box:focus { border-color: var(--accent); }
 
+/* ── REVIEW SECTION (detail modal only) ── */
+.review-section {
+  border: 1.5px solid rgba(250,204,21,0.3);
+  border-radius: 12px; overflow: hidden; margin-top: 4px;
+}
+.review-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px;
+  background: rgba(250,204,21,0.07);
+  border-bottom: 1px solid rgba(250,204,21,0.15);
+}
+.review-badge {
+  width: 22px; height: 22px; border-radius: 5px;
+  background: #ca8a04;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+.review-title { font-size: 13px; font-weight: 600; flex: 1; color: #fde68a; }
+.review-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.review-stack { position: relative; margin-bottom: 4px; }
+.review-stack-stage { position: relative; width: 100%; }
+.review-ghost { position: absolute; left: 50%; transform: translateX(-50%); border-radius: 8px; background: var(--surface3); border: 1px solid rgba(250,204,21,0.15); width: calc(100% - 16px); pointer-events: none; }
+.review-ghost-2 { bottom: -10px; height: 12px; opacity: 0.4; }
+.review-ghost-1 { bottom: -6px; height: 12px; opacity: 0.65; width: calc(100% - 8px); }
+.review-front {
+  position: relative; z-index: 3; width: 100%; border-radius: 8px; overflow: hidden;
+  border: 1.5px solid rgba(250,204,21,0.5); cursor: pointer; background: var(--surface2);
+  transition: transform 0.15s;
+}
+.review-front:hover { transform: translateY(-2px); }
+.review-front img { width: 100%; height: auto; display: block; }
+.review-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 10px; background: rgba(250,204,21,0.05);
+  border-top: 1px solid rgba(250,204,21,0.1);
+}
+.review-nav-btn {
+  background: var(--surface2); border: 1px solid rgba(250,204,21,0.2);
+  color: #fde68a; border-radius: 5px; padding: 3px 10px;
+  font-size: 11px; cursor: pointer; transition: all 0.15s;
+  font-family: 'JetBrains Mono', monospace;
+}
+.review-nav-btn:hover:not(:disabled) { background: rgba(250,204,21,0.1); }
+.review-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.review-counter { font-size: 11px; color: #ca8a04; font-family: 'JetBrains Mono', monospace; }
+.review-del-btn { background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 12px; padding: 2px 6px; border-radius: 4px; }
+.review-del-btn:hover { color: var(--red); background: rgba(239,68,68,0.1); }
+.review-paste-zone {
+  border: 1.5px dashed rgba(250,204,21,0.25); border-radius: 8px;
+  padding: 14px 10px; text-align: center; transition: all 0.2s; position: relative;
+}
+.review-paste-zone.active { border-color: rgba(250,204,21,0.6); background: rgba(250,204,21,0.04); }
+.review-paste-zone p { font-size: 11px; color: #ca8a04; }
+.review-paste-zone .rp-sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
+.review-text {
+  width: 100%; background: var(--surface2); border: 1px solid rgba(250,204,21,0.2);
+  border-radius: 8px; padding: 10px 12px; color: var(--text);
+  font-size: 13px; font-family: 'Noto Sans KR', sans-serif;
+  resize: vertical; min-height: 80px; outline: none; line-height: 1.7;
+  transition: border-color 0.2s;
+}
+.review-text:focus { border-color: rgba(250,204,21,0.5); }
+.review-text-display {
+  font-size: 13px; color: var(--text2); line-height: 1.7;
+  padding: 4px 0; white-space: pre-wrap;
+}
+.review-save-btn {
+  align-self: flex-end; padding: 7px 20px; border-radius: 7px; border: none;
+  background: #ca8a04; color: #fff; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s; font-family: 'Noto Sans KR', sans-serif;
+}
+.review-save-btn:hover { background: #a16207; }
+.review-uploading { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #ca8a04; }
+
 /* ── LIST PAGE ── */
 .list-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
 .list-header h2 { font-size: 17px; font-weight: 600; flex: 1; }
@@ -295,14 +369,14 @@ main { padding: 76px 20px 48px; max-width: 1160px; margin: 0 auto; }
 .filter-btn:hover { color: var(--text); background: var(--surface2); }
 .filter-btn.active { color: #fff; border-color: transparent; }
 
-.filter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px; }
+.filter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
 .filter-card { border-radius: 10px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; background: var(--surface); }
 .filter-card:hover { border-color: var(--border2); transform: translateY(-2px); }
-.filter-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+.filter-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; min-height: 158px; }
 .filter-card-no-img { width: 100%; aspect-ratio: 16/9; background: var(--surface2); display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 11px; }
-.filter-card-meta { padding: 8px 10px; }
-.filter-card-meta .fc-title { font-size: 12px; font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.filter-card-meta .fc-date { font-size: 11px; color: var(--text3); }
+.filter-card-meta { padding: 10px 12px; }
+.filter-card-meta .fc-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.filter-card-meta .fc-date { font-size: 12px; color: var(--text3); }
 
 /* ── DETAIL MODAL ── */
 .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.87); backdrop-filter: blur(4px); display: flex; align-items: flex-start; justify-content: center; padding: 24px; overflow-y: auto; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
@@ -317,8 +391,8 @@ main { padding: 76px 20px 48px; max-width: 1160px; margin: 0 auto; }
 
 .detail-part { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .detail-part-header { display: flex; align-items: center; gap: 10px; padding: 9px 13px; background: var(--surface2); border-bottom: 1px solid var(--border); }
-.detail-part-imgs { display: flex; gap: 8px; flex-wrap: wrap; padding: 11px 13px; }
-.detail-img-wrap { position: relative; flex: 1; min-width: 110px; max-width: 190px; border-radius: 7px; overflow: hidden; border: 1.5px solid var(--border2); cursor: pointer; }
+.detail-part-imgs { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; }
+.detail-img-wrap { position: relative; width: 100%; border-radius: 7px; overflow: hidden; border: 1.5px solid var(--border2); cursor: pointer; }
 .detail-img-wrap.latest { border-color: var(--accent); }
 .detail-img-wrap img { width: 100%; display: block; }
 .detail-img-tag { position: absolute; top: 4px; right: 4px; background: var(--accent); color: #fff; font-size: 9px; padding: 1px 5px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; }
@@ -457,6 +531,7 @@ for all using (true) with check (true);</pre>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body" id="detail-parts"></div>
+    <div class="modal-body" id="review-section" style="padding-top:0"></div>
   </div>
 </div>
 
@@ -474,12 +549,12 @@ for all using (true) with check (true);</pre>
 //  CONSTANTS
 // ═══════════════════════════════════
 const PARTS = [
-  { id:1, name:'추세 방향',     color:'#4f8ef7', multi:false },
-  { id:2, name:'MSS',           color:'#a855f7', multi:false },
-  { id:3, name:'유동성 · 횡보', color:'#22c55e', multi:true  },
-  { id:4, name:'오더블럭',      color:'#f97316', multi:true  },
-  { id:5, name:'돌파',          color:'#eab308', multi:true  },
-  { id:6, name:'진입',          color:'#ef4444', multi:false },
+  { id:1, name:'추세 방향',     color:'#4f8ef7' },
+  { id:2, name:'MSS',           color:'#a855f7' },
+  { id:3, name:'유동성 · 횡보', color:'#22c55e' },
+  { id:4, name:'오더블럭',      color:'#f97316' },
+  { id:5, name:'돌파',          color:'#eab308' },
+  { id:6, name:'진입',          color:'#ef4444' },
 ];
 const MAX_W = 2560;
 const QUALITY = 0.92;
@@ -577,6 +652,8 @@ let session = null; // { journalId, title, parts:{}, uploading:Set }
 let filterPart = 1;
 let pasteTarget = 1;
 let journalsCache = [];
+// review state per journal
+const reviewState = {}; // { [jid]: { imgs:[{id,image_path,seq}], text:'', stackIdx:0, uploading:false } }
 
 // ═══════════════════════════════════
 //  TOAST
@@ -806,9 +883,6 @@ document.addEventListener('paste', e => {
 async function handleFile(file, pid) {
   if (!session) return;
   const p = PARTS.find(x => x.id === pid);
-  if (!p.multi && session.parts[pid].length > 0) {
-    toast('이 파트는 이미지 1장만 허용됩니다.', 'err'); return;
-  }
   const comment = document.getElementById('cb-' + pid)?.value || '';
   session.uploading.add(pid);
   renderParts();
@@ -972,6 +1046,8 @@ async function openDetail(jid) {
   document.getElementById('modal-title').textContent = j?.title || '매매 상세';
   document.getElementById('modal-date').textContent = j ? new Date(j.start_time).toLocaleDateString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit' }) : '';
   document.getElementById('detail-parts').innerHTML = '<div class="loading-msg">불러오는 중...</div>';
+  document.getElementById('review-section').innerHTML = '';
+  reviewPasteTarget = null;
   document.getElementById('detail-modal').classList.add('open');
   try {
     const r = await sbFetch(`/rest/v1/journal_parts?journal_id=eq.${jid}&select=*&order=part_id.asc,seq.asc`);
@@ -1009,9 +1085,197 @@ async function openDetail(jid) {
       </div>`;
     }).join('');
   } catch(e) { document.getElementById('detail-parts').innerHTML = `<div class="empty-state">로드 실패: ${e.message}</div>`; }
+
+  // Load review
+  await loadReview(jid);
 }
 
-function closeModal() { document.getElementById('detail-modal').classList.remove('open'); }
+async function loadReview(jid) {
+  const sec = document.getElementById('review-section');
+  if (!reviewState[jid]) {
+    // fetch from DB: part_id=7 means review
+    try {
+      const r = await sbFetch(`/rest/v1/journal_parts?journal_id=eq.${jid}&part_id=eq.7&select=*&order=seq.asc`);
+      const rows = await r.json();
+      const textRow = rows.find(r => !r.image_path);
+      const imgRows = rows.filter(r => r.image_path);
+      reviewState[jid] = {
+        jid,
+        imgs: imgRows,
+        text: textRow?.comment || '',
+        textRowId: textRow?.id || null,
+        stackIdx: Math.max(0, imgRows.length - 1),
+        uploading: false,
+        editing: false,
+      };
+    } catch {
+      reviewState[jid] = { jid, imgs:[], text:'', textRowId:null, stackIdx:0, uploading:false, editing:false };
+    }
+  }
+  renderReview(jid);
+}
+
+function renderReview(jid) {
+  const sec = document.getElementById('review-section');
+  const rs = reviewState[jid];
+  if (!rs) return;
+
+  const imgs = rs.imgs;
+  const total = imgs.length;
+  const idx = Math.min(rs.stackIdx, Math.max(0, total-1));
+  rs.stackIdx = idx;
+
+  // stack HTML
+  let stackHtml = '';
+  if (total === 0) {
+    stackHtml = `<div style="text-align:center;padding:20px 0">
+      <p style="font-size:11px;color:var(--text3)">클릭 후 Ctrl+V 로 이미지 추가</p>
+    </div>`;
+  } else {
+    const cur = imgs[idx];
+    stackHtml = `<div class="review-stack-stage">
+      ${total >= 3 ? `<div class="review-ghost review-ghost-2"></div>` : ''}
+      ${total >= 2 ? `<div class="review-ghost review-ghost-1"></div>` : ''}
+      <div class="review-front" onclick="openLightbox('${cur.image_path}')">
+        <img src="${cur.image_path}" loading="lazy" alt="">
+      </div>
+      <div class="review-nav">
+        <button class="review-nav-btn" onclick="reviewPrev('${jid}')" ${idx===0?'disabled':''}>‹ 이전</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="review-counter">${idx+1} / ${total}</span>
+          ${idx===total-1 ? `<span style="font-size:9px;background:#ca8a04;color:#fff;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace">최신</span>` : ''}
+          <button class="review-del-btn" onclick="reviewDelImg('${jid}','${cur.id}','${cur.image_path}')">🗑</button>
+        </div>
+        <button class="review-nav-btn" onclick="reviewNext('${jid}')" ${idx===total-1?'disabled':''}>다음 ›</button>
+      </div>
+    </div>`;
+  }
+
+  // paste zone
+  const pasteZone = `<div class="review-paste-zone ${rs.uploading?'active':''}" id="rpz-${jid}" onclick="setReviewPasteTarget('${jid}')">
+    ${rs.uploading ? `<div class="uploading-overlay"><div class="spinner"></div></div>` : ''}
+    <p>📋 ${total===0 ? 'Ctrl+V 로 이미지 붙여넣기' : '+ Ctrl+V 로 이미지 추가'}</p>
+    <p class="rp-sub">이 영역 클릭 후 → Ctrl+V</p>
+  </div>`;
+
+  // text area
+  const textHtml = rs.editing
+    ? `<textarea class="review-text" id="review-text-${jid}" placeholder="복기 내용을 입력하세요...">${rs.text}</textarea>
+       <button class="review-save-btn" onclick="saveReviewText('${jid}')">저장</button>`
+    : `<div class="review-text-display" onclick="startEditReview('${jid}')">${
+        rs.text
+          ? rs.text.replace(/</g,'&lt;')
+          : '<span style="color:var(--text3);font-size:12px">클릭하여 복기 내용 입력...</span>'
+      }</div>`;
+
+  sec.innerHTML = `<div class="review-section">
+    <div class="review-header">
+      <div class="review-badge">📝</div>
+      <div class="review-title">복기</div>
+      <span style="font-size:11px;color:#ca8a04;font-family:'JetBrains Mono',monospace">${total}장</span>
+    </div>
+    <div class="review-body">
+      ${stackHtml}
+      ${pasteZone}
+      ${textHtml}
+    </div>
+  </div>`;
+}
+
+let reviewPasteTarget = null;
+function setReviewPasteTarget(jid) {
+  reviewPasteTarget = jid;
+  document.querySelectorAll('.review-paste-zone').forEach(z => z.classList.remove('active'));
+  document.getElementById('rpz-' + jid)?.classList.add('active');
+}
+
+function reviewPrev(jid) {
+  if (reviewState[jid] && reviewState[jid].stackIdx > 0) {
+    reviewState[jid].stackIdx--;
+    renderReview(jid);
+  }
+}
+function reviewNext(jid) {
+  const rs = reviewState[jid];
+  if (rs && rs.stackIdx < rs.imgs.length - 1) {
+    rs.stackIdx++;
+    renderReview(jid);
+  }
+}
+
+async function reviewDelImg(jid, rowId, imgUrl) {
+  if (!confirm('이 이미지를 삭제할까요?')) return;
+  try {
+    await sbFetch(`/rest/v1/journal_parts?id=eq.${rowId}`, { method: 'DELETE' });
+    await deleteStorageFile(imgUrl);
+    const rs = reviewState[jid];
+    rs.imgs = rs.imgs.filter(x => x.id !== rowId);
+    rs.stackIdx = Math.max(0, rs.imgs.length - 1);
+    renderReview(jid);
+    toast('삭제됨', 'inf');
+  } catch(e) { toast('삭제 실패: ' + e.message, 'err'); }
+}
+
+function startEditReview(jid) {
+  if (reviewState[jid]) { reviewState[jid].editing = true; renderReview(jid); }
+  setTimeout(() => document.getElementById('review-text-' + jid)?.focus(), 50);
+}
+
+async function saveReviewText(jid) {
+  const val = document.getElementById('review-text-' + jid)?.value || '';
+  const rs = reviewState[jid];
+  rs.text = val;
+  rs.editing = false;
+  try {
+    if (rs.textRowId) {
+      await sbFetch(`/rest/v1/journal_parts?id=eq.${rs.textRowId}`, {
+        method: 'PATCH', body: JSON.stringify({ comment: val })
+      });
+    } else {
+      const r = await sbFetch('/rest/v1/journal_parts', {
+        method: 'POST',
+        body: JSON.stringify({ journal_id: jid, part_id: 7, image_path: null, comment: val, seq: 0 })
+      });
+      const row = (await r.json())[0];
+      rs.textRowId = row.id;
+    }
+    toast('복기 저장됨 ✓', 'ok');
+  } catch(e) { toast('저장 실패: ' + e.message, 'err'); }
+  renderReview(jid);
+}
+
+// Paste handler — check if review is active target
+const _origPaste = document.onpaste;
+document.addEventListener('paste', async e => {
+  if (!reviewPasteTarget) return;
+  // only if modal is open
+  if (!document.getElementById('detail-modal').classList.contains('open')) { reviewPasteTarget = null; return; }
+  const item = [...e.clipboardData.items].find(i => i.type.startsWith('image/'));
+  if (!item) return;
+  e.stopImmediatePropagation(); // prevent regular paste handler
+  const jid = reviewPasteTarget;
+  const rs = reviewState[jid];
+  if (!rs) return;
+  rs.uploading = true;
+  renderReview(jid);
+  try {
+    const file = item.getAsFile();
+    const blob = await compressFile(file);
+    const seq = rs.imgs.length;
+    const imageUrl = await uploadBlob(blob, jid, 7, seq);
+    const r = await sbFetch('/rest/v1/journal_parts', {
+      method: 'POST',
+      body: JSON.stringify({ journal_id: jid, part_id: 7, image_path: imageUrl, comment: '', seq })
+    });
+    const row = (await r.json())[0];
+    rs.imgs.push({ id: row.id, image_path: imageUrl, seq });
+    rs.stackIdx = rs.imgs.length - 1;
+    toast('복기 이미지 업로드 완료 ✓', 'ok');
+  } catch(err) { toast('업로드 실패: ' + err.message, 'err'); }
+  finally { rs.uploading = false; renderReview(jid); }
+}, true); // capture phase so it runs before regular paste
+
+function closeModal() { document.getElementById('detail-modal').classList.remove('open'); reviewPasteTarget = null; }
 
 // ═══════════════════════════════════
 //  LIGHTBOX
