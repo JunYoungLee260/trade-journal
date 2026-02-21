@@ -169,6 +169,88 @@ main { padding: 76px 20px 48px; max-width: 1160px; margin: 0 auto; }
 }
 .active-part-badge { font-weight: 600; padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #fff; }
 
+/* ── MINDSET MODAL ── */
+.mindset-overlay {
+  position: fixed; inset: 0; z-index: 250;
+  background: rgba(0,0,0,0.88); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.mindset-overlay.open { opacity: 1; pointer-events: all; }
+.mindset-card {
+  width: 100%; max-width: 560px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; overflow: hidden;
+  transform: scale(0.96); transition: transform 0.2s;
+}
+.mindset-overlay.open .mindset-card { transform: scale(1); }
+.mindset-card-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  background: rgba(79,142,247,0.06);
+}
+.mindset-icon { font-size: 20px; }
+.mindset-card-header h3 { flex: 1; font-size: 15px; font-weight: 700; color: var(--text); }
+.mindset-edit-btn {
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--text3); border-radius: 6px; padding: 4px 10px;
+  font-size: 11px; cursor: pointer; transition: all 0.15s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.mindset-edit-btn:hover { background: var(--surface2); color: var(--text); }
+.mindset-body { padding: 22px 24px; }
+.mindset-text-display {
+  font-size: 14px; line-height: 1.9; color: var(--text2);
+  white-space: pre-wrap; min-height: 80px;
+}
+.mindset-text-display .empty-hint { color: var(--text3); font-size: 13px; font-style: italic; }
+.mindset-textarea {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 12px 14px; color: var(--text);
+  font-size: 14px; line-height: 1.9; font-family: 'Noto Sans KR', sans-serif;
+  resize: vertical; min-height: 160px; outline: none;
+  transition: border-color 0.2s;
+}
+.mindset-textarea:focus { border-color: var(--accent); }
+.mindset-footer {
+  display: flex; gap: 10px; justify-content: flex-end;
+  padding: 14px 20px; border-top: 1px solid var(--border);
+}
+.mindset-save-btn {
+  padding: 8px 22px; border-radius: 8px; border: none;
+  background: var(--accent); color: #fff;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background 0.2s; font-family: 'Noto Sans KR', sans-serif;
+}
+.mindset-save-btn:hover { background: var(--accent2); }
+.mindset-start-btn {
+  padding: 8px 22px; border-radius: 8px; border: none;
+  background: var(--green); color: #fff;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background 0.2s; font-family: 'Noto Sans KR', sans-serif;
+}
+.mindset-start-btn:hover { background: #16a34a; }
+.mindset-cancel-btn {
+  padding: 8px 16px; border-radius: 8px;
+  background: transparent; color: var(--text3);
+  border: 1px solid var(--border2); font-size: 13px; cursor: pointer;
+  transition: all 0.15s; font-family: 'Noto Sans KR', sans-serif;
+}
+.mindset-cancel-btn:hover { background: var(--surface2); color: var(--text); }
+
+/* mindset quick card on record page */
+.mindset-bar {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 16px; border-radius: 10px; margin-bottom: 16px;
+  background: rgba(79,142,247,0.05); border: 1px solid rgba(79,142,247,0.12);
+  cursor: pointer; transition: border-color 0.2s;
+}
+.mindset-bar:hover { border-color: rgba(79,142,247,0.3); }
+.mindset-bar-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.mindset-bar-text { font-size: 12px; color: var(--text2); line-height: 1.7; flex: 1; white-space: pre-wrap; }
+.mindset-bar-edit { font-size: 11px; color: var(--text3); flex-shrink: 0; margin-top: 2px; }
+
 /* ── PARTS GRID ── */
 .parts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 @media (max-width: 900px) { .parts-grid { grid-template-columns: 1fr 1fr; } }
@@ -542,13 +624,18 @@ for all using (true) with check (true);</pre>
         <div class="session-label" id="session-label">매매를 시작하려면 버튼을 누르세요</div>
         <div class="session-title-input" id="session-title" style="color:var(--text3);font-size:14px">매매 시작 버튼을 눌러주세요</div>
       </div>
-      <button class="btn btn-start" id="btn-start" onclick="startSession()">▶ 매매 시작</button>
+      <button class="btn btn-start" id="btn-start" onclick="openMindsetModal()">▶ 매매 시작</button>
       <button class="btn btn-end" id="btn-end" style="display:none" onclick="endSession()">■ 종료 &amp; 저장</button>
     </div>
     <div class="paste-hint" id="paste-hint" style="display:none">
       <kbd>Ctrl+V</kbd> 로 클립보드 이미지 붙여넣기 가능 — 현재 파트:
       <span class="active-part-badge" id="paste-badge">1. 추세 방향</span>
       <span style="color:var(--text3)">(카드 클릭으로 변경)</span>
+    </div>
+    <div class="mindset-bar" id="mindset-bar" onclick="openMindsetEdit()">
+      <div class="mindset-bar-icon">🧘</div>
+      <div class="mindset-bar-text" id="mindset-bar-text"></div>
+      <div class="mindset-bar-edit">수정 ✎</div>
     </div>
     <div class="parts-grid" id="parts-grid"></div>
   </div>
@@ -597,6 +684,27 @@ for all using (true) with check (true);</pre>
     <div class="filter-grid" id="filter-grid"></div>
   </div>
 </main>
+
+<!-- MINDSET MODAL -->
+<div class="mindset-overlay" id="mindset-overlay">
+  <div class="mindset-card">
+    <div class="mindset-card-header">
+      <div class="mindset-icon">🧘</div>
+      <h3>매매 전 마인드셋</h3>
+      <button class="mindset-edit-btn" id="mindset-edit-btn" onclick="toggleMindsetEdit()">수정</button>
+    </div>
+    <div class="mindset-body">
+      <div class="mindset-text-display" id="mindset-display">
+        <span class="empty-hint">아직 작성된 내용이 없습니다.<br>수정 버튼을 눌러 매매 전 읽을 내용을 작성해보세요.</span>
+      </div>
+      <textarea class="mindset-textarea" id="mindset-textarea" placeholder="매매 전에 읽을 내용을 작성하세요.&#10;&#10;예)&#10;- 셋업이 완성되기 전까지 절대 진입하지 않는다&#10;- 손절은 무조건 지킨다&#10;- FOMO 금지" style="display:none"></textarea>
+    </div>
+    <div class="mindset-footer" id="mindset-footer">
+      <button class="mindset-cancel-btn" onclick="closeMindsetModal()">닫기</button>
+      <button class="mindset-start-btn" onclick="confirmStartSession()">✓ 읽었습니다 — 매매 시작</button>
+    </div>
+  </div>
+</div>
 
 <!-- DETAIL MODAL -->
 <div class="modal-overlay" id="detail-modal" onclick="if(event.target===this)closeModal()">
@@ -758,6 +866,104 @@ function showPage(name, btn) {
 // ═══════════════════════════════════
 //  SESSION
 // ═══════════════════════════════════
+// ═══════════════════════════════════
+//  MINDSET
+// ═══════════════════════════════════
+const MINDSET_KEY = 'trade_mindset';
+let mindsetEditing = false;
+
+function loadMindsetText() {
+  return localStorage.getItem(MINDSET_KEY) || '';
+}
+function saveMindsetText(text) {
+  localStorage.setItem(MINDSET_KEY, text);
+}
+
+function openMindsetModal() {
+  const text = loadMindsetText();
+  renderMindsetModal(text, false);
+  document.getElementById('mindset-overlay').classList.add('open');
+}
+
+function openMindsetEdit() {
+  const text = loadMindsetText();
+  renderMindsetModal(text, true);
+  document.getElementById('mindset-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('mindset-textarea')?.focus(), 100);
+}
+
+function renderMindsetModal(text, editing) {
+  mindsetEditing = editing;
+  const display = document.getElementById('mindset-display');
+  const textarea = document.getElementById('mindset-textarea');
+  const editBtn = document.getElementById('mindset-edit-btn');
+  const footer = document.getElementById('mindset-footer');
+
+  if (editing) {
+    display.style.display = 'none';
+    textarea.style.display = 'block';
+    textarea.value = text;
+    editBtn.textContent = '취소';
+    footer.innerHTML = `
+      <button class="mindset-cancel-btn" onclick="closeMindsetModal()">닫기</button>
+      <button class="mindset-save-btn" onclick="saveMindset()">저장</button>`;
+  } else {
+    textarea.style.display = 'none';
+    display.style.display = 'block';
+    if (text) {
+      display.textContent = text;
+      display.style.color = 'var(--text2)';
+    } else {
+      display.innerHTML = '<span class="empty-hint">아직 작성된 내용이 없습니다.<br>수정 버튼을 눌러 매매 전 읽을 내용을 작성해보세요.</span>';
+    }
+    editBtn.textContent = '수정';
+    footer.innerHTML = `
+      <button class="mindset-cancel-btn" onclick="closeMindsetModal()">닫기</button>
+      <button class="mindset-start-btn" onclick="confirmStartSession()">✓ 읽었습니다 — 매매 시작</button>`;
+  }
+}
+
+function toggleMindsetEdit() {
+  const text = loadMindsetText();
+  if (mindsetEditing) {
+    renderMindsetModal(text, false); // cancel edit
+  } else {
+    renderMindsetModal(text, true);
+    setTimeout(() => document.getElementById('mindset-textarea')?.focus(), 50);
+  }
+}
+
+function saveMindset() {
+  const text = document.getElementById('mindset-textarea').value;
+  saveMindsetText(text);
+  renderMindsetModal(text, false);
+  updateMindsetBar();
+  toast('마인드셋 저장됨 ✓', 'ok');
+}
+
+function closeMindsetModal() {
+  document.getElementById('mindset-overlay').classList.remove('open');
+  mindsetEditing = false;
+}
+
+function confirmStartSession() {
+  closeMindsetModal();
+  startSession();
+}
+
+function updateMindsetBar() {
+  const text = loadMindsetText();
+  const barText = document.getElementById('mindset-bar-text');
+  if (!barText) return;
+  if (text) {
+    barText.textContent = text;
+    barText.style.color = '';
+  } else {
+    barText.textContent = '클릭하여 매매 전 마인드셋을 작성하세요.';
+    barText.style.color = 'var(--text3)';
+  }
+}
+
 async function getAutoTitle(startTime) {
   // startTime: Date object - use this for the date key
   const dateKey = startTime.toLocaleDateString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit' }).replace(/\. /g,'.').replace('.','');
@@ -801,6 +1007,7 @@ async function startSession() {
   document.getElementById('session-title').textContent = title; document.getElementById('session-title').style.color='var(--text)';
   
   document.getElementById('paste-hint').style.display = 'flex';
+  updateMindsetBar();
   renderParts();
   toast('📈 ' + title + ' 시작!', 'ok');
 }
@@ -1407,13 +1614,14 @@ function closeModal() { document.getElementById('detail-modal').classList.remove
 // ═══════════════════════════════════
 function openLightbox(src) { document.getElementById('lb-img').src = src; document.getElementById('lightbox').classList.add('open'); }
 function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLightbox(); closeModal(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLightbox(); closeModal(); closeMindsetModal(); } });
 
 // ═══════════════════════════════════
 //  INIT
 // ═══════════════════════════════════
 function init() {
   document.getElementById('setup-screen').style.display = 'none';
+  updateMindsetBar();
   renderParts();
 }
 
