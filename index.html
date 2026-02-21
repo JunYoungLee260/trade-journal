@@ -345,13 +345,45 @@ main { padding: 76px 20px 48px; max-width: 1160px; margin: 0 auto; }
 .review-uploading { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #ca8a04; }
 
 /* ── LIST PAGE ── */
-.list-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.list-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .list-header h2 { font-size: 17px; font-weight: 600; flex: 1; }
 .list-count { font-size: 12px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
 
+/* ── WIN/LOSS STATS BAR ── */
+.stats-bar {
+  display: flex; align-items: center; gap: 20px;
+  padding: 14px 20px; border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  margin-bottom: 18px; flex-wrap: wrap; gap: 16px;
+}
+.stat-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.stat-value { font-size: 20px; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1; }
+.stat-label { font-size: 10px; color: var(--text3); font-weight: 500; letter-spacing: 0.05em; }
+.stat-divider { width: 1px; height: 32px; background: var(--border2); flex-shrink: 0; }
+.winrate-bar-wrap { flex: 1; min-width: 160px; }
+.winrate-bar-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 5px; }
+.winrate-bar-track {
+  height: 6px; border-radius: 99px; background: var(--surface3);
+  overflow: hidden; position: relative;
+}
+.winrate-bar-fill {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--green), #16a34a);
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── JOURNAL LIST ── */
 .journal-list { display: flex; flex-direction: column; gap: 8px; }
-.journal-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 14px; }
+.journal-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 13px 16px;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 12px;
+}
 .journal-item:hover { border-color: var(--border2); background: var(--surface2); }
+.journal-item.win  { border-left: 3px solid var(--green); }
+.journal-item.loss { border-left: 3px solid var(--red); }
+.journal-item.be   { border-left: 3px solid var(--text3); }
 .journal-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); width: 28px; flex-shrink: 0; text-align: center; }
 .journal-info { flex: 1; min-width: 0; }
 .journal-title { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
@@ -359,6 +391,21 @@ main { padding: 76px 20px 48px; max-width: 1160px; margin: 0 auto; }
 .part-dots { display: flex; gap: 4px; }
 .part-dot { width: 7px; height: 7px; border-radius: 50%; opacity: 0.2; }
 .part-dot.has { opacity: 1; }
+
+/* win/loss toggle buttons */
+.wl-btns { display: flex; gap: 4px; flex-shrink: 0; }
+.wl-btn {
+  padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;
+  cursor: pointer; border: 1.5px solid var(--border2);
+  background: transparent; color: var(--text3);
+  transition: all 0.15s; font-family: 'Noto Sans KR', sans-serif;
+  white-space: nowrap;
+}
+.wl-btn:hover { border-color: var(--border2); background: var(--surface2); }
+.wl-btn.win-active  { background: rgba(34,197,94,0.15);  border-color: var(--green); color: var(--green); }
+.wl-btn.loss-active { background: rgba(239,68,68,0.15);  border-color: var(--red);   color: var(--red); }
+.wl-btn.be-active   { background: rgba(85,94,120,0.2);   border-color: var(--text3); color: var(--text2); }
+
 .journal-del { background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 4px; opacity: 0; transition: all 0.15s; }
 .journal-item:hover .journal-del { opacity: 1; }
 .journal-del:hover { color: var(--red); }
@@ -511,6 +558,35 @@ for all using (true) with check (true);</pre>
     <div class="list-header">
       <h2>매매일지</h2>
       <span class="list-count" id="list-count">—</span>
+    </div>
+    <div class="stats-bar" id="stats-bar" style="display:none">
+      <div class="stat-item">
+        <div class="stat-value" id="stat-total" style="color:var(--text)">0</div>
+        <div class="stat-label">TOTAL</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-win" style="color:var(--green)">0</div>
+        <div class="stat-label">WIN</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-loss" style="color:var(--red)">0</div>
+        <div class="stat-label">LOSS</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="stat-be" style="color:var(--text3)">0</div>
+        <div class="stat-label">B/E</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="winrate-bar-wrap">
+        <div class="winrate-bar-label">
+          <span>승률</span>
+          <span id="stat-rate" style="font-family:'JetBrains Mono',monospace;color:var(--text)">—</span>
+        </div>
+        <div class="winrate-bar-track">
+          <div class="winrate-bar-fill" id="stat-bar" style="width:0%"></div>
+        </div>
+      </div>
     </div>
     <div id="journal-list"><div class="loading-msg">불러오는 중...</div></div>
   </div>
@@ -957,25 +1033,74 @@ async function loadJournals() {
   } catch(e) { el.innerHTML = `<div class="empty-state">로드 실패: ${e.message}</div>`; }
 }
 
+function getWlClass(result) {
+  if (result === 'win') return 'win';
+  if (result === 'loss') return 'loss';
+  if (result === 'be') return 'be';
+  return '';
+}
+
 function renderList() {
   const el = document.getElementById('journal-list');
   document.getElementById('list-count').textContent = journalsCache.length + '개';
-  if (!journalsCache.length) { el.innerHTML = '<div class="empty-state">저장된 매매일지가 없습니다</div>'; return; }
+  if (!journalsCache.length) {
+    el.innerHTML = '<div class="empty-state">저장된 매매일지가 없습니다</div>';
+    document.getElementById('stats-bar').style.display = 'none';
+    return;
+  }
+
+  // stats
+  const decided = journalsCache.filter(j => j.result);
+  const wins  = journalsCache.filter(j => j.result === 'win').length;
+  const losses = journalsCache.filter(j => j.result === 'loss').length;
+  const bes   = journalsCache.filter(j => j.result === 'be').length;
+  const rate  = decided.length ? Math.round(wins / decided.length * 100) : null;
+
+  const sb = document.getElementById('stats-bar');
+  sb.style.display = 'flex';
+  document.getElementById('stat-total').textContent = journalsCache.length;
+  document.getElementById('stat-win').textContent   = wins;
+  document.getElementById('stat-loss').textContent  = losses;
+  document.getElementById('stat-be').textContent    = bes;
+  document.getElementById('stat-rate').textContent  = rate !== null ? rate + '%' : '—';
+  document.getElementById('stat-bar').style.width   = rate !== null ? rate + '%' : '0%';
+
   el.innerHTML = journalsCache.map((j, i) => {
     const date = new Date(j.start_time).toLocaleDateString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit' });
     const dots = PARTS.map(p => `<div class="part-dot" id="dot-${j.id}-${p.id}" style="background:${p.color}" title="${p.name}"></div>`).join('');
-    return `<div class="journal-item" onclick="openDetail('${j.id}')">
+    const wlClass = getWlClass(j.result);
+    return `<div class="journal-item ${wlClass}" onclick="openDetail('${j.id}')">
       <div class="journal-num">#${journalsCache.length-i}</div>
       <div class="journal-info">
         <div class="journal-title">${j.title}</div>
         <div class="journal-date">${date}</div>
       </div>
       <div class="part-dots">${dots}</div>
+      <div class="wl-btns" onclick="event.stopPropagation()">
+        <button class="wl-btn ${j.result==='win'?'win-active':''}"  onclick="setResult('${j.id}','win')">승</button>
+        <button class="wl-btn ${j.result==='be'?'be-active':''}"   onclick="setResult('${j.id}','be')">B/E</button>
+        <button class="wl-btn ${j.result==='loss'?'loss-active':''}" onclick="setResult('${j.id}','loss')">패</button>
+      </div>
       <button class="journal-del" onclick="deleteJournal(event,'${j.id}')">🗑</button>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
     </div>`;
   }).join('');
   journalsCache.forEach(j => loadDots(j.id));
+}
+
+async function setResult(jid, result) {
+  const j = journalsCache.find(x => x.id === jid);
+  if (!j) return;
+  // toggle off if same
+  const newResult = j.result === result ? null : result;
+  try {
+    await sbFetch(`/rest/v1/journals?id=eq.${jid}`, {
+      method: 'PATCH', body: JSON.stringify({ result: newResult })
+    });
+    j.result = newResult;
+    renderList();
+    journalsCache.forEach(j => loadDots(j.id));
+  } catch(e) { toast('저장 실패: ' + e.message, 'err'); }
 }
 
 async function loadDots(jid) {
