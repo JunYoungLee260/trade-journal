@@ -537,6 +537,74 @@ main { padding: 76px 20px 48px; max-width: 1160px; margin: 0 auto; }
 
 .empty-state { text-align: center; padding: 56px 20px; color: var(--text3); font-size: 13px; }
 .loading-msg { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
+
+/* ── TAGS ── */
+.tag-input-wrap {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 10px;
+  background: var(--surface2); border: 1px solid rgba(250,204,21,0.2);
+  border-radius: 8px; cursor: text; min-height: 38px;
+  transition: border-color 0.2s;
+}
+.tag-input-wrap:focus-within { border-color: rgba(250,204,21,0.5); }
+.tag-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(250,204,21,0.12); border: 1px solid rgba(250,204,21,0.3);
+  color: #fde68a; border-radius: 20px; padding: 2px 10px;
+  font-size: 12px; font-weight: 500; white-space: nowrap;
+}
+.tag-chip-del {
+  background: none; border: none; color: #ca8a04; cursor: pointer;
+  font-size: 13px; padding: 0; line-height: 1; margin-left: 2px;
+}
+.tag-chip-del:hover { color: var(--red); }
+.tag-input-field {
+  border: none; background: transparent; outline: none;
+  color: var(--text); font-size: 12px; font-family: 'Noto Sans KR', sans-serif;
+  min-width: 80px; flex: 1;
+}
+.tag-input-field::placeholder { color: var(--text3); }
+.tag-save-row { display: flex; justify-content: flex-end; }
+
+/* filter page tag section */
+.tag-section { margin-bottom: 24px; }
+.tag-section-title {
+  font-size: 12px; color: var(--text3); font-weight: 600;
+  letter-spacing: 0.06em; margin-bottom: 10px;
+}
+.tag-filter-cloud { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag-filter-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 20px; cursor: pointer;
+  font-size: 12px; font-weight: 600;
+  background: var(--surface2); border: 1.5px solid var(--border2);
+  color: var(--text2); transition: all 0.15s;
+}
+.tag-filter-chip:hover { border-color: #ca8a04; color: #fde68a; }
+.tag-filter-chip.active {
+  background: rgba(250,204,21,0.12); border-color: #ca8a04; color: #fde68a;
+}
+.tag-filter-chip .tag-count {
+  background: var(--surface3); border-radius: 10px;
+  padding: 0 6px; font-size: 10px; color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+}
+.tag-filter-chip.active .tag-count { background: rgba(250,204,21,0.2); color: #ca8a04; }
+.tag-journal-grid { display: flex; flex-direction: column; gap: 8px; }
+.tag-journal-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 18px; cursor: pointer;
+  transition: all 0.2s; display: flex; align-items: center; gap: 14px;
+}
+.tag-journal-item:hover { border-color: var(--border2); background: var(--surface2); }
+.tag-journal-title { font-size: 14px; font-weight: 500; flex: 1; }
+.tag-journal-date { font-size: 11px; color: var(--text3); margin-left: auto; }
+.tag-journal-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.tag-mini {
+  font-size: 10px; padding: 1px 7px; border-radius: 10px;
+  background: rgba(250,204,21,0.1); border: 1px solid rgba(250,204,21,0.25);
+  color: #ca8a04;
+}
 </style>
 </head>
 <body>
@@ -682,6 +750,13 @@ for all using (true) with check (true);</pre>
   <div class="page" id="page-filter">
     <div class="filter-bar" id="filter-bar"></div>
     <div class="filter-grid" id="filter-grid"></div>
+    <div class="tag-section" id="tag-section" style="display:none">
+      <div class="tag-section-title">태그</div>
+      <div class="tag-filter-cloud" id="tag-filter-cloud"></div>
+      <div style="margin-top:20px">
+        <div id="tag-filtered-list" class="tag-journal-grid"></div>
+      </div>
+    </div>
   </div>
 </main>
 
@@ -837,7 +912,8 @@ let filterPart = 1;
 let pasteTarget = 1;
 let journalsCache = [];
 // review state per journal
-const reviewState = {}; // { [jid]: { imgs:[{id,image_path,seq}], text:'', stackIdx:0, uploading:false } }
+const reviewState = {}; // { [jid]: { imgs, text, tags:[], textRowId, tagRowId, stackIdx, uploading, editing, editingTags } }
+let activeTag = null; // currently selected tag in filter page
 
 // ═══════════════════════════════════
 //  TOAST
@@ -1335,13 +1411,32 @@ async function deleteJournal(e, jid) {
 // ═══════════════════════════════════
 //  FILTER
 // ═══════════════════════════════════
+let filterMode = 'part'; // 'part' | 'tag'
+
 async function renderFilter() {
-  document.getElementById('filter-bar').innerHTML = PARTS.map(p =>
-    `<button class="filter-btn ${filterPart===p.id?'active':''}"
-      style="${filterPart===p.id?`background:${p.color};border-color:${p.color}`:''}"
-      onclick="setFilter(${p.id})">${p.id}. ${p.name}</button>`
-  ).join('');
+  // filter bar: parts + tag tab
+  document.getElementById('filter-bar').innerHTML =
+    PARTS.map(p =>
+      `<button class="filter-btn ${filterMode==='part'&&filterPart===p.id?'active':''}"
+        style="${filterMode==='part'&&filterPart===p.id?`background:${p.color};border-color:${p.color}`:''}"
+        onclick="setFilter(${p.id})">${p.id}. ${p.name}</button>`
+    ).join('') +
+    `<button class="filter-btn ${filterMode==='tag'?'active':''}"
+      style="${filterMode==='tag'?'background:#ca8a04;border-color:#ca8a04;color:#fff':''}"
+      onclick="setTagMode()">🏷 태그</button>`;
+
   const grid = document.getElementById('filter-grid');
+  const tagSection = document.getElementById('tag-section');
+
+  if (filterMode === 'tag') {
+    grid.style.display = 'none';
+    tagSection.style.display = 'block';
+    await showTagSection();
+    return;
+  }
+
+  grid.style.display = 'grid';
+  tagSection.style.display = 'none';
   grid.innerHTML = '<div class="loading-msg" style="grid-column:1/-1">불러오는 중...</div>';
   try {
     const r = await sbFetch(`/rest/v1/journal_parts?part_id=eq.${filterPart}&select=*,journals(id,title,start_time)&order=created_at.desc`);
@@ -1365,7 +1460,8 @@ async function renderFilter() {
   } catch(e) { grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">로드 실패: ${e.message}</div>`; }
 }
 
-function setFilter(pid) { filterPart = pid; renderFilter(); }
+function setFilter(pid) { filterMode = 'part'; filterPart = pid; renderFilter(); }
+function setTagMode() { filterMode = 'tag'; activeTag = null; renderFilter(); }
 
 // ═══════════════════════════════════
 //  DETAIL MODAL
@@ -1423,25 +1519,24 @@ async function openDetail(jid) {
 }
 
 async function loadReview(jid) {
-  const sec = document.getElementById('review-section');
   if (!reviewState[jid]) {
-    // fetch from DB: part_id=7 means review
     try {
       const r = await sbFetch(`/rest/v1/journal_parts?journal_id=eq.${jid}&part_id=eq.7&select=*&order=seq.asc`);
       const rows = await r.json();
-      const textRow = rows.find(r => !r.image_path);
+      const textRow = rows.find(r => !r.image_path && r.seq === 0);
+      const tagRow  = rows.find(r => !r.image_path && r.seq === 99);
       const imgRows = rows.filter(r => r.image_path);
       reviewState[jid] = {
-        jid,
-        imgs: imgRows,
+        jid, imgs: imgRows,
         text: textRow?.comment || '',
         textRowId: textRow?.id || null,
+        tags: tagRow?.comment ? JSON.parse(tagRow.comment) : [],
+        tagRowId: tagRow?.id || null,
         stackIdx: Math.max(0, imgRows.length - 1),
-        uploading: false,
-        editing: false,
+        uploading: false, editing: false, editingTags: false,
       };
     } catch {
-      reviewState[jid] = { jid, imgs:[], text:'', textRowId:null, stackIdx:0, uploading:false, editing:false };
+      reviewState[jid] = { jid, imgs:[], text:'', textRowId:null, tags:[], tagRowId:null, stackIdx:0, uploading:false, editing:false, editingTags:false };
     }
   }
   renderReview(jid);
@@ -1500,6 +1595,23 @@ function renderReview(jid) {
           : '<span style="color:var(--text3);font-size:12px">클릭하여 복기 내용 입력...</span>'
       }</div>`;
 
+  // tag UI
+  const tags = rs.tags || [];
+  const tagChips = tags.map((t,i) =>
+    `<span class="tag-chip">#${t}<button class="tag-chip-del" onclick="removeTag('${jid}',${i})">×</button></span>`
+  ).join('');
+
+  const tagHtml = `
+    <div>
+      <div style="font-size:11px;color:#ca8a04;font-weight:600;margin-bottom:6px;letter-spacing:0.05em">태그</div>
+      <div class="tag-input-wrap" onclick="document.getElementById('tag-field-${jid}').focus()">
+        ${tagChips}
+        <input class="tag-input-field" id="tag-field-${jid}"
+          placeholder="${tags.length===0?'태그 입력 후 Enter':'+태그'}"
+          onkeydown="handleTagInput(event,'${jid}')">
+      </div>
+    </div>`;
+
   sec.innerHTML = `<div class="review-section">
     <div class="review-header">
       <div class="review-badge">📝</div>
@@ -1510,8 +1622,131 @@ function renderReview(jid) {
       ${stackHtml}
       ${pasteZone}
       ${textHtml}
+      ${tagHtml}
     </div>
   </div>`;
+}
+
+async function saveReviewTags(jid) {
+  const rs = reviewState[jid];
+  if (!rs) return;
+  const tagsJson = JSON.stringify(rs.tags);
+  try {
+    if (rs.tagRowId) {
+      await sbFetch(`/rest/v1/journal_parts?id=eq.${rs.tagRowId}`, {
+        method: 'PATCH', body: JSON.stringify({ comment: tagsJson })
+      });
+    } else {
+      const r = await sbFetch('/rest/v1/journal_parts', {
+        method: 'POST',
+        body: JSON.stringify({ journal_id: jid, part_id: 7, image_path: null, comment: tagsJson, seq: 99 })
+      });
+      const row = (await r.json())[0];
+      rs.tagRowId = row.id;
+    }
+  } catch(e) { toast('태그 저장 실패: ' + e.message, 'err'); }
+}
+
+function handleTagInput(e, jid) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/^#/, '').replace(/,/g,'');
+    if (!val) return;
+    const rs = reviewState[jid];
+    if (!rs) return;
+    if (rs.tags.includes(val)) { e.target.value = ''; return; }
+    rs.tags.push(val);
+    saveReviewTags(jid);
+    renderReview(jid);
+  }
+  if (e.key === 'Backspace' && e.target.value === '') {
+    const rs = reviewState[jid];
+    if (rs && rs.tags.length) {
+      rs.tags.pop();
+      saveReviewTags(jid);
+      renderReview(jid);
+    }
+  }
+}
+
+async function removeTag(jid, idx) {
+  const rs = reviewState[jid];
+  if (!rs) return;
+  rs.tags.splice(idx, 1);
+  await saveReviewTags(jid);
+  renderReview(jid);
+}
+
+// collect all tags across all journals for filter page
+async function loadAllTags() {
+  try {
+    const r = await sbFetch('/rest/v1/journal_parts?part_id=eq.7&seq=eq.99&select=journal_id,comment,journals(id,title,start_time,result)');
+    if (!r.ok) throw new Error(await r.text());
+    const rows = await r.json();
+    // build tag -> [{journal}] map
+    const tagMap = {};
+    rows.forEach(row => {
+      let tags = [];
+      try { tags = JSON.parse(row.comment || '[]'); } catch {}
+      tags.forEach(tag => {
+        if (!tagMap[tag]) tagMap[tag] = [];
+        tagMap[tag].push({ ...row.journals, tagRowJournalId: row.journal_id });
+      });
+    });
+    return tagMap;
+  } catch(e) { return {}; }
+}
+
+let tagMap = {};
+
+async function showTagSection() {
+  const section = document.getElementById('tag-section');
+  const cloud = document.getElementById('tag-filter-cloud');
+  section.style.display = 'block';
+  cloud.innerHTML = '<span style="font-size:12px;color:var(--text3)">불러오는 중...</span>';
+  tagMap = await loadAllTags();
+  renderTagCloud();
+}
+
+function renderTagCloud() {
+  const cloud = document.getElementById('tag-filter-cloud');
+  const tags = Object.keys(tagMap);
+  if (!tags.length) {
+    cloud.innerHTML = '<span style="font-size:12px;color:var(--text3)">복기에 태그를 추가하면 여기에 표시됩니다</span>';
+    document.getElementById('tag-filtered-list').innerHTML = '';
+    return;
+  }
+  cloud.innerHTML = tags.sort().map(tag =>
+    `<div class="tag-filter-chip ${activeTag===tag?'active':''}" onclick="selectTag('${tag}')">
+      #${tag}
+      <span class="tag-count">${tagMap[tag].length}</span>
+    </div>`
+  ).join('');
+  if (activeTag && tagMap[activeTag]) renderTagJournals(activeTag);
+  else document.getElementById('tag-filtered-list').innerHTML = '';
+}
+
+function selectTag(tag) {
+  activeTag = (activeTag === tag) ? null : tag;
+  renderTagCloud();
+}
+
+function renderTagJournals(tag) {
+  const journals = tagMap[tag] || [];
+  const list = document.getElementById('tag-filtered-list');
+  if (!journals.length) { list.innerHTML = ''; return; }
+  list.innerHTML = `
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;font-weight:600">#${tag} 관련 매매일지 ${journals.length}개</div>
+    ${journals.map(j => {
+      const date = new Date(j.start_time).toLocaleDateString('ko-KR', { month:'2-digit', day:'2-digit' });
+      const wlColor = j.result==='win' ? 'var(--green)' : j.result==='loss' ? 'var(--red)' : 'var(--text3)';
+      const wlText  = j.result==='win' ? '승' : j.result==='loss' ? '패' : j.result==='be' ? 'B/E' : '';
+      return `<div class="tag-journal-item" onclick="openDetail('${j.id}')">
+        ${wlText ? `<span style="font-size:11px;font-weight:700;color:${wlColor};min-width:24px">${wlText}</span>` : '<span style="min-width:24px"></span>'}
+        <div class="tag-journal-title">${j.title}</div>
+        <div class="tag-journal-date">${date}</div>
+      </div>`;
+    }).join('')}`;
 }
 
 let reviewPasteTarget = null;
